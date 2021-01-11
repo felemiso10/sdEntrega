@@ -85,64 +85,68 @@ var controller = {
         //Recoger los parametros de la peticion
         var params = req.body;
         //Validar los datos 
-        var validateEmail = !validator.isEmpty(params.email) && validator.isEmail(params.email);
+        var validateEmail = !validator.isEmpty(params.email) &&validator.isEmail(params.email);
         var validatePassword = !validator.isEmpty(params.password);
 
-        if (validateEmail && validatePassword) {
+        if(validateEmail && validatePassword){
             //Buscar usuarios que coincidan con el email
-            User.findOne({ email: params.email.toLowerCase() }, (err, user) => {
-
-                if (err) {
+            User.findOne({email: params.email.toLowerCase()},(err,user)=>{
+                
+                if(err){
                     return res.status(500).send({
                         message: "Error al intentar identificarse"
-
+                     
                     });
                 }
-
-                if (!user) {
+                
+                if(!user){
                     return res.status(404).send({
                         message: "El usuario no existe"
-
+                        
                     });
                 }
                 //Si lo encuentra, 
                 //Comprobar la contraseña
-                bcrypt.compare(params.password, user.password, (err, check) => {
+                bcrypt.compare(params.password, user.password, (err,check)=>{
+
+
 
                     //Si es ok,
-                    if (check) {
+                    if(check){
                         //Generar token jwt y devolverlo
-                        if (params.gettoken) {
+                        /*if(params.gettoken){
                             //Devolver los datos
                             return res.status(200).send({
                                 token: jwt.createToken(user)
                             });
-                        }
-
+                        }*/
+                        
+                        
                         //Limpiar el objeto User lo hago para que el cliente no pueda acceder a la contraseña
                         user.password = undefined;
                         //Devolver los datos
                         return res.status(200).send({
                             message: "success",
-                            user
-
+                            user: user,
+                            token:jwt.createToken(user)
                         });
                     }
-                    else {
+                    else{
                         return res.status(404).send({
                             message: "Las credenciales no son correctas"
                         });
                     }
                 });
-
+                
             });
 
         }
-        else {
+        else{
             return res.status(500).send({
                 message: "los datos no son correctos"
             });
         }
+
     },
     update: function (req, res) {
          //Recoger los datos
