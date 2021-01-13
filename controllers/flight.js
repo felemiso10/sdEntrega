@@ -57,41 +57,17 @@ var controller = {
     }
   },
   getFlights: function (req, res) {
-    //Recoger pagina actual
-    if (req.params.page == null || req.param.page == undefined) {
-      var page = 1;
-    } else {
-      var page = parseInt(req.params.page);
-    }
-
-    //Indicar opciones de paginacion
-    var options = {
-      sort: { date: -1 }, //Orden descendente
-      limit: 5,
-      page: page,
-    };
-    //Find paginado
-    Flight.paginate({}, options, (err, flights) => {
-      if (err) {
-        return res.status(400).send({
-          message: "Error al hacer la consulta",
-        });
+    Flight.find().exec((err,flights)=>{
+      if(err || !flights){
+          return res.status(404).send({
+              message: 'No hay coches'
+          });
       }
-
-      if (!flights) {
-        return res.status(404).send({
-          message: "No hay vuelos",
-        });
-      }
-
-      //Devolver el resultado (topics, total de topic, total de paginas)
       return res.status(200).send({
-        status: "success",
-        flights: flights.docs,
-        totalDocs: flights.totalDocs,
-        totalPages: flights.totalPages,
+          status: 'success',
+          flights: flights
       });
-    });
+  })
   },
   getFlightById: function (req, res) {
     //Sacar id
@@ -194,7 +170,7 @@ var controller = {
             }
         })
 
-        user.flights.push(flightId);
+        user.flights.push(flight);
         user.save((err) => {
             if (err) {
                 return res.status(400).send({

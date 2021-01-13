@@ -62,41 +62,17 @@ var controller = {
     }
   },
   getHotels: function (req, res) {
-    //Recoger pagina actual
-    if (req.params.page == null || req.param.page == undefined) {
-      var page = 1;
-    } else {
-      var page = parseInt(req.params.page);
-    }
-
-    //Indicar opciones de paginacion
-    var options = {
-      sort: { date: -1 }, //Orden descendente
-      limit: 5,
-      page: page,
-    };
-    //Find paginado
-    Hotel.paginate({}, options, (err, hotels) => {
-      if (err) {
-        return res.status(400).send({
-          message: "Error al hacer la consulta",
-        });
+    Hotel.find().exec((err,hotels)=>{
+      if(err || !hotels){
+          return res.status(404).send({
+              message: 'No hay coches'
+          });
       }
-
-      if (!hotels) {
-        return res.status(404).send({
-          message: "No hay vuelos",
-        });
-      }
-
-      //Devolver el resultado (topics, total de topic, total de paginas)
       return res.status(200).send({
-        status: "success",
-        hotels: hotels.docs,
-        totalDocs: hotels.totalDocs,
-        totalPages: hotels.totalPages,
+          status: 'success',
+          hotels: hotels
       });
-    });
+  })
   },
 
   getHotelById: function (req, res) {
@@ -197,7 +173,7 @@ var controller = {
           }
         });
 
-        user.hotels.push(hotelId);
+        user.hotels.push(hotel);
         user.save((err) => {
           if (err) {
             return res.status(400).send({

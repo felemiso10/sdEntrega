@@ -66,43 +66,19 @@ var controller = {
     },
 
     getCars: function (req,res) {
-        //Recoger pagina actual
-        if(req.params.page == null || req.param.page == undefined){
-            var page = 1;
-        }
-        else{
-            var page = parseInt(req.params.page);
-        }
-
-        //Indicar opciones de paginacion
-        var options = {
-            sort:{date: -1},//Orden descendente
-            limit: 5,
-            page:page
-        }
+        
         //Find paginado
-        Car.paginate({},options,(err,cars)=>{
-            
-            if(err){
-                return res.status(400).send({
-                    message: 'Error al hacer la consulta'
+            Car.find().exec((err,cars)=>{
+                if(err || !cars){
+                    return res.status(404).send({
+                        message: 'No hay coches'
+                    });
+                }
+                return res.status(200).send({
+                    status: 'success',
+                    cars: cars
                 });
-            }
-
-            if(!cars){
-                return res.status(404).send({
-                    message: 'No hay vuelos'
-                });
-            }
-            
-            //Devolver el resultado (topics, total de topic, total de paginas)
-            return res.status(200).send({
-                status: 'success',
-                cars: cars.docs,
-                totalDocs: cars.totalDocs,
-                totalPages: cars.totalPages
-            });
-        });
+            })
     },
 
     getCarById: function (req, res) {
@@ -204,7 +180,7 @@ var controller = {
                 }
             })
     
-            user.cars.push(carId);
+            user.cars.push(car);
             user.save((err) => {
                 if (err) {
                     return res.status(400).send({
@@ -215,7 +191,8 @@ var controller = {
                 //Devolver una respuesta
                 return res.status(200).send({
                     status: 'success',
-                    user
+                    user:user,
+                    carReserved:car
                 });
             });
         });
